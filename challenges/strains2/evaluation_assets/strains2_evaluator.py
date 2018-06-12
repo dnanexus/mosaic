@@ -104,7 +104,7 @@ def compute_metrics(metrics_list):
 	FP = metrics_list[1]
 	TN = metrics_list[2]
 	FN = metrics_list[3]
-	total=TP+TN+FP+TN
+	total=TP+TN+FP+FN
 	accuracy=(TP+TN)/total
 	precision=TP/(TP+FP)
 	recall=TP/(TP+FN)
