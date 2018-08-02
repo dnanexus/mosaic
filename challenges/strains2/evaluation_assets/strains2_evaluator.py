@@ -158,15 +158,21 @@ iter_outfile.write("cutoff\tTP\tFP\tTN\tFN\taccuracy\tprecision\trecall\tf1\tmis
 
 for iteration in range(0,39):
 	# first, we get the lowest number in the submission
-	masked_submission_matrix = submission_matrix[submission_matrix != 0.0]
-	lowest = np.min(masked_submission_matrix)
+	masked_submission_matrix = []
+	for row in submission_matrix:
+		if sum(row) == 0:
+			continue
+		else:
+			masked_submission_matrix.append(row)
+	masked_list = [sum(row) for row in masked_submission_matrix]
+	lowest = min(i for i in masked_list if i > 0)
 
-	# second, we remove the row with this lowest confidence value
+	# second, we replace the row with this lowest confidence value with zeroes
 	row_counter = 0
 	for row in submission_matrix:
 		if lowest in row:
-			submission_matrix = np.delete(submission_matrix, row_counter, axis=0)
-			truth_matrix = np.delete(truth_matrix, row_counter, axis=0)
+			submission_matrix[row_counter] = [0., 0., 0., 0.]
+			# this turns it off if nothing is left but 0s
 			if lowest == 0.0:
 				break
 		else:
