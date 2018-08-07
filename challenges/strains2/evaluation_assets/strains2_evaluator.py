@@ -47,7 +47,6 @@ def read_submission(file):
 			line_count += 1
 			line = line.strip().split("\t", 1)
 			entry_matrix = map(float, line[1].split("\t"))
-
 			# some sanity checking
 			if len(entry_matrix) != 4:
 				sys.exit("Warning: wrong number of columns in submission file.")
@@ -109,7 +108,7 @@ def compute_metrics(metrics_list):
 	precision=TP/(TP+FP)
 	recall=TP/(TP+FN)
 	F1_score=2*(precision*recall)/(precision+recall)
-	misclass=(FP+FN)/total								# fixed, Keng had this wrong
+	misclass=(FP+FN)/total								# fixed
 
 	return [accuracy,precision,recall,F1_score,misclass]
 
@@ -123,9 +122,11 @@ def adjusted_rand(answers_matrix, submission_matrix):
 	for sublist in submission_matrix:
 		for entry in sublist:
 			submission_list.append(entry)
+    #Set to 1 any values above 0 so that ARI calculation is correct
+	submission_list_binary = [1 if i > 0 else i for i in submission_list]
 
 	# now we calculate rand score
-	return adjusted_rand_score(answers_list, submission_list)
+	return adjusted_rand_score(answers_list, submission_list_binary)
 
 truth_matrix = read_answer_key(truth_file)[0]
 submission_matrix = read_submission(results_file)
@@ -155,18 +156,29 @@ if list(set(flat_submission_list)) == [0,1]:
 # This one will require an iteration of removing the lowest confidence score, over and over.
 iter_outfile = open(results_file[:-4] + "_PRC.tsv", "w")
 iter_outfile.write("cutoff\tTP\tFP\tTN\tFN\taccuracy\tprecision\trecall\tf1\tmisclassification\tadj_rand_index\n")
+iter_outfile.write("0.0\t" + "\t".join(str(int(item)) for item in get_stats(truth_matrix, submission_matrix)) + "\t")
+iter_outfile.write("\t".join(str(item) for item in init_metrics))
+iter_outfile.write("\t" + str(adjusted_rand(truth_matrix, submission_matrix)) + "\n")
+
 
 for iteration in range(0,39):
 	# first, we get the lowest number in the submission
-	masked_submission_matrix = submission_matrix[submission_matrix != 0.0]
-	lowest = np.min(masked_submission_matrix)
-
-	# second, we remove the row with this lowest confidence value
+	masked_submission_matrix = []
+	for row in submission_matrix:
+		if sum(row) == 0:
+			continue
+		else:
+			masked_submission_matrix.append(row)
+	masked_list = [sum(row) for row in masked_submission_matrix]
+	lowest = min(i for i in masked_list if i > 0)
+	if lowest == 1:
+		break
+	# second, we replace the row with this lowest confidence value with zeroes
 	row_counter = 0
 	for row in submission_matrix:
 		if lowest in row:
-			submission_matrix = np.delete(submission_matrix, row_counter, axis=0)
-			truth_matrix = np.delete(truth_matrix, row_counter, axis=0)
+			submission_matrix[row_counter] = [0., 0., 0., 0.]
+			# this turns it off if nothing is left but 0s
 			if lowest == 0.0:
 				break
 		else:
