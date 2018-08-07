@@ -107,10 +107,10 @@ def compute_metrics(metrics_list):
 	accuracy=(TP+TN)/total
 	precision=TP/(TP+FP)
 	recall=TP/(TP+FN)
-	F1_score=2*(precision*recall)/(precision+recall)
+	F1=2*(precision*recall)/(precision+recall)
 	misclass=(FP+FN)/total								# fixed
 
-	return [accuracy,precision,recall,F1_score,misclass]
+	return [accuracy,precision,recall,F1,misclass]
 
 def adjusted_rand(answers_matrix, submission_matrix):
 	# the adjusted_rand_score option just takes a 1D array, so we've got to flatten these 2D arrays.
@@ -132,10 +132,10 @@ truth_matrix = read_answer_key(truth_file)[0]
 submission_matrix = read_submission(results_file)
 
 # creating the first output file
-stats_outfile = open(results_file[:-4] + "_scores.tsv", "w")
+stats_outfile = open("strains2_submission_scores.tsv", "w")
 
 # header
-stats_outfile.write("TP\tFP\tTN\tFN\taccuracy\tprecision\trecall\tF1_score\tmisclassification_rate\tadjusted_rand_index\n")
+stats_outfile.write("TP\tFP\tTN\tFN\tAccuracy\tPrecision\tRecall\tF1\tmisclassification_rate\tadjusted_rand_index\n")
 # data
 init_metrics = compute_metrics(get_stats(truth_matrix, submission_matrix))
 stats_outfile.write("\t".join(str(int(item)) for item in get_stats(truth_matrix, submission_matrix)) + "\t")
@@ -148,14 +148,14 @@ stats_outfile.close()
 # sanity check - is this file binary?
 flat_submission_list = [item for sublist in submission_matrix for item in sublist]
 if list(set(flat_submission_list)) == [0,1]:
-	binary_report = open(results_file[:-4] + "_binary", "w")
+	binary_report = open("strains2_binary", "w")
 	binary_report.write("binary == true")
 	binary_report.close()
 	sys.exit()
 
 # This one will require an iteration of removing the lowest confidence score, over and over.
-iter_outfile = open(results_file[:-4] + "_PRC.tsv", "w")
-iter_outfile.write("cutoff\tTP\tFP\tTN\tFN\taccuracy\tprecision\trecall\tf1\tmisclassification\tadj_rand_index\n")
+iter_outfile = open("strains2_submission_PRC_strains2.tsv", "w")
+iter_outfile.write("cutoff\tTP\tFP\tTN\tFN\tAccuracy\tPrecision\tRecall\tF1\tmisclassification\tadj_rand_index\n")
 iter_outfile.write("0.0\t" + "\t".join(str(int(item)) for item in get_stats(truth_matrix, submission_matrix)) + "\t")
 iter_outfile.write("\t".join(str(item) for item in init_metrics))
 iter_outfile.write("\t" + str(adjusted_rand(truth_matrix, submission_matrix)) + "\n")
