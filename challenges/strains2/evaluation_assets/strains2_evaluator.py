@@ -175,6 +175,7 @@ for iteration in range(0,39):
 	#Stop once value of 1 is reached
 	if lowest == 1:
 		break
+
 	# second, we replace the row with this lowest confidence value with zeroes
 	row_counter = 0
 	for row in submission_matrix:
