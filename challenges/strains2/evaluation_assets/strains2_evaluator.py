@@ -122,7 +122,7 @@ def adjusted_rand(answers_matrix, submission_matrix):
 	for sublist in submission_matrix:
 		for entry in sublist:
 			submission_list.append(entry)
-    #Set to 1 any values above 0 so that ARI calculation is correct
+	#Set to 1 any values above 0 so that ARI calculation is correct
 	submission_list_binary = [1 if i > 0 else i for i in submission_list]
 
 	# now we calculate rand score
@@ -172,8 +172,8 @@ for iteration in range(0,39):
 	masked_list = [sum(row) for row in masked_submission_matrix]
 	lowest = min(i for i in masked_list if i > 0)
 
-    #Stop once value of 1 is reached
-    if lowest == 1:
+	#Stop once value of 1 is reached
+	if lowest == 1:
 		break
 	# second, we replace the row with this lowest confidence value with zeroes
 	row_counter = 0
