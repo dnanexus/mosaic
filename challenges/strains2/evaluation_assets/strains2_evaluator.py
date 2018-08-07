@@ -171,7 +171,9 @@ for iteration in range(0,39):
 			masked_submission_matrix.append(row)
 	masked_list = [sum(row) for row in masked_submission_matrix]
 	lowest = min(i for i in masked_list if i > 0)
-	if lowest == 1:
+
+    #Stop once maximum is reached
+    if lowest == 1:
 		break
 	# second, we replace the row with this lowest confidence value with zeroes
 	row_counter = 0
